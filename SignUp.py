@@ -1,41 +1,50 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat May 06 23:12:06 2017
-
-@author: Tanya
-"""
-
 import cx_Oracle
-class SignUP:
-    custid=1000000000000000
-    password=raw_input("Enter the password")
+import getNum,Menu
+
+def sign_up():
+    password=raw_input("Enter the password:")
     l=len(password)
-    if l>8:
-        print("Enter valid 8 digit password with alphanumeric values allowed")
-    name=raw_input("Enter the name:")
-    address=("Enter the address:")
-    money=("Enter the amount deposited in start:")
-    accnt_status='open'
-    con=cx_Oracle.connect('TANYA/tanya@localhost/xe')
+    while l > 8:
+        print("Invalid Password:")
+        pas=raw_input("Enter the password:")
+        l=len(password)
+
+    con=cx_Oracle.connect('Nikhil/nikhil@localhost/xe')
     cur=con.cursor()
-    cur.execute('INSERT into valid VALUES(:1,:2)',(custid,password))
-    con.commit()
-    con.close()
 
+    typ=raw_input("Enter account type : ")
+    while(typ!='ca' and typ!='CA' and typ!='sb' and typ!='SB'):
+        typ=raw_input("Enter account type : ")
+    fname=raw_input("Enter the Firstname : ")
+    lname=raw_input("Enter the Lastname : ")
+    add1=raw_input("Address Line 1 : ")
+    add2=raw_input("Address Line 2 : ")
+    city=raw_input("City : ")
+    state=raw_input("State : ")
+    try:
+        pincode=input("pincode : ")
+    except NameError:
+        print("Invalid Input")
+        Menu.main()
+    money=input("Enter the money to be deposited at the start:")
 
+    if(typ=='CA' or typ=='ca'):
+        if(money<5000):
+            while(money<5000):
+                print("You need minimum 5000")
+                money=input("Enter the money to be deposited at the start : ")
 
-
-#first_name=raw_input("Enter the first name:")
-#last_name=raw_input("Enter the last name")
-#add_line1=raw_input("Enter the address Line 1:")
-#add_line2=raw_input("Enter the address Line 2:")
-#city=raw_input("City:")
-#state=raw_input("State:")
-#pincode=input("Enter the pin:")
-#phone=input("Enter the Phone Number:")
-#email=raw_input("Enter the email:")
-#username=raw_input("Enter username:")
-#password=raw_input("Enter password:")
-#accnt_type=raw_input("Enter the account type:")
-#accnt_status=raw_input("Enter the account status:")
-#custid=
+    accountNumber=getNum.getNum()
+    try:
+        cur.execute ("INSERT INTO valid VALUES (:1,:2)",(accountNumber,password))
+        print(accountNumber)
+        cur.execute("INSERT into detail VALUES(:1,:2,:3,:4,:5,:6,:7,:8,:9,:10,:11)",(accountNumber,typ,fname,lname,add1,add2,city,state,pincode,money,'open'))
+        accountNumber=str(accountNumber)
+        accountNumber="b_"+accountNumber
+        query="create table "+ accountNumber + " (time varchar2(10),transact_type varchar2(15),amount int,balance int)"
+        cur.execute(query)
+        con.commit()
+        con.close()
+    except cx_Oracle.DatabaseError as e:
+        print("DatabaseError")
+        Menu.main()
